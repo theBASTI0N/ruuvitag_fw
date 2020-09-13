@@ -1,0 +1,64 @@
+{
+  "name": "@theBASTI0N/ruuvitag_fw",
+  "version": "0.0.0-development",
+  "description": "Ruuvitag door sensor",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/theBASTI0N/ruuvitag_fw.git"
+  },
+  "bugs": {
+    "url": "https://github.com/theBASTI0N/ruuvitag_fw/issues"
+  },
+  "homepage": "https://github.com/theBASTI0N/ruuvitag_fw",
+  "keywords": [
+    "Cloud",
+    "IoT",
+    "ruuvi",
+    "AssetTracker",
+    "NordicSemiconductor",
+    "Door Alarm"
+  ],
+  "author": "theBASTI0N",
+  "license": "BSD-3-Clause",
+  "devDependencies": {
+    "@commitlint/cli": "^8.3.5",
+    "@commitlint/config-angular": "^8.3.4",
+    "@semantic-release/commit-analyzer": "^8.0.1",
+    "husky": "^4.2.5",
+    "semantic-release": "^17.0.7",
+    "standard": "^14.3.3",
+    "stream-buffers": "^3.0.2"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -e"
+    }
+  },
+  "release": {
+    "branches": [
+      "master"
+    ],
+    "remoteTags": true,
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      [
+        "@semantic-release/github",
+        {
+          "assets": [
+            {
+              "path": "/home/runner/work/ruuvitag_fw/ruuvitag_fw/ruuvi_firmware_dfu.zip",
+              "name": "ruuvi-door-firmware-dfu-${nextRelease.gitTag}.zip",
+              "label": "DFU package- Compatiable with shipped ruuvitag FW"
+            },
+            {
+              "path": "/home/runner/work/ruuvitag_fw/ruuvitag_fw/ruuvi_firmware_full.hex",
+              "name": "ruuvi-door-firmware-full-${nextRelease.gitTag}.hex",
+              "label": "Full hex package for use with Ruuvitags"
+            }
+          ]
+        }
+      ]
+    ]
+  }
+}

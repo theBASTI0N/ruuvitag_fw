@@ -1,0 +1,102 @@
+name: Build and Release
+
+on: push
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GH_URL: "https://api.github.com"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Cache GCC ARM Embed binary
+        id: cache-gcc-arm
+        uses: actions/cache@v1
+        with:
+          path: gcc-arm/
+          key: ${{ runner.OS }}-gcc-arm-none-eabi-4_9-2015q3-20150921-linux
+
+      - name: Download GCC ARM Embed
+        if: steps.cache-gcc-arm.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ${GITHUB_WORKSPACE}/gcc-arm/
+          wget -q 'https://launchpad.net/gcc-arm-embedded/4.9/4.9-2015-q3-update/+download/gcc-arm-none-eabi-4_9-2015q3-20150921-linux.tar.bz2' -O ${GITHUB_WORKSPACE}/gcc-arm/gcc-arm-none-eabi-4_9-2015q3-20150921-linux.tar.bz2
+
+      - name: Install GCC ARM Embed
+        run: |
+          sudo tar xvjf ${GITHUB_WORKSPACE}/gcc-arm/gcc-arm-none-eabi-4_9-2015q3-20150921-linux.tar.bz2 -C /usr/local
+      
+      - name: Cache NRF CMD Tool binary
+        id: cache-nrf-cmd
+        uses: actions/cache@v1
+        with:
+          path: nrf-cmd/
+          key: ${{ runner.OS }}-nRF-Command-Line-Tools_10_9_0_Linux-amd64
+
+      - name: Download NRF CMD Tool
+        if: steps.cache-nrf-cmd.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ${GITHUB_WORKSPACE}/nrf-cmd/
+          wget -q 'https://www.nordicsemi.com/-/media/Software-and-other-downloads/Desktop-software/nRF-command-line-tools/sw/Versions-10-x-x/10-9-0/nRFCommandLineTools1090Linuxamd64tar.gz' -O ${GITHUB_WORKSPACE}/nrf-cmd/nRF-Command-Line-Tools.tar.gz
+
+      - name: Install NRF CMD tools
+        run: |
+          cd ${GITHUB_WORKSPACE}/nrf-cmd
+          sudo tar xvf ${GITHUB_WORKSPACE}/nrf-cmd/nRF-Command-Line-Tools.tar.gz
+          sudo dpkg -i nRF-Command-Line-Tools_10_9_0_Linux-amd64.deb
+          
+      - name: Cache NRF SDK
+        id: cache-nrf-sdk
+        uses: actions/cache@v1
+        with:
+          path: nrf-sdk/
+          key: ${{ runner.OS }}-nRF5_SDK_12.3.0_d7731ad
+
+      - name: Download NRF SDK
+        if: steps.cache-nrf-sdk.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ${GITHUB_WORKSPACE}/nrf-sdk/
+          wget -q 'http://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v12.x.x/nRF5_SDK_12.3.0_d7731ad.zip' -O ${GITHUB_WORKSPACE}/nrf-sdk/nRF5_SDK_12.3.0_d7731ad.zip
+
+      - name: Install Rust+Cargo
+        run: |
+          sudo /bin/sh -c 'curl https://sh.rustup.rs -sSf | sh -s -- -y'
+      
+      - name: Prepare PIP
+        run: |
+          curl https://bootstrap.pypa.io/get-pip.py --output get-pip.py
+          sudo python2 get-pip.py
+          sudo pip2 install nrfutil --ignore-installed PyYAML
+      
+      - name: Clone Repo
+        run: |
+          cd ${GITHUB_WORKSPACE}
+          git clone https://github.com/${GITHUB_REPOSITORY} ruuvitag_fw
+
+      - name: Determine next release version
+        run: |
+          npm ci
+          export NEXT_VERSION=`node ${GITHUB_WORKSPACE}/ruuvitag_fw/.github/workflows/get-next-version.js`
+
+      - name: Build
+        run: |
+          cp ${GITHUB_WORKSPACE}/nrf-sdk/nRF5_SDK_12.3.0_d7731ad.zip ${GITHUB_WORKSPACE}/ruuvitag_fw
+          cd ${GITHUB_WORKSPACE}/ruuvitag_fw
+          mkdir -p -v ${GITHUB_WORKSPACE}/.cache
+          export XDG_CACHE_HOME=${GITHUB_WORKSPACE}/.cache
+          make all
+          nrfutil pkg generate --debug-mode --application ${GITHUB_WORKSPACE}/ruuvitag_fw/ruuvi_examples/ruuvi_firmware/ruuvitag_b/s132/armgcc/_build/ruuvi_firmware.hex --hw-version 3 --sd-req 0x91 --key-file ${GITHUB_WORKSPACE}/ruuvitag_fw/keys/ruuvi_open_private.pem ruuvi_firmware_dfu.zip
+          mv -v ${GITHUB_WORKSPACE}/ruuvitag_fw/ruuvi_firmware_dfu.zip ${GITHUB_WORKSPACE}/ruuvi_firmware_dfu.zip
+          nrfutil settings generate --family NRF52 --application ${GITHUB_WORKSPACE}/ruuvitag_fw/ruuvi_examples/ruuvi_firmware/ruuvitag_b/s132/armgcc/_build/ruuvi_firmware.hex --application-version 1 --bootloader-version 1 --bl-settings-version 1 settings.hex
+          mergehex -m ${GITHUB_WORKSPACE}/ruuvitag_fw/hex/s132_nrf52_3.1.0_softdevice.hex ${GITHUB_WORKSPACE}/ruuvitag_fw/bootloader/ruuvitag_b_debug/armgcc/_build/ruuvitag_b_bootloader.hex settings.hex -o sbc.hex
+          mergehex -m sbc.hex ${GITHUB_WORKSPACE}/ruuvitag_fw/ruuvi_examples/ruuvi_firmware/ruuvitag_b/s132/armgcc/_build/ruuvi_firmware.hex -o packet.hex
+          mv -v ${GITHUB_WORKSPACE}/ruuvitag_fw/packet.hex ${GITHUB_WORKSPACE}/ruuvi_firmware_full.hex
+
+      - name: Semantic release
+        continue-on-error: true
+        run: |
+          npx semantic-release

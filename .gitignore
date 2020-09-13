@@ -1,0 +1,96 @@
+# C++ objects and libs
+
+*.slo
+*.lo
+*.o
+*.a
+*.la
+*.lai
+*.so
+*.dll
+*.dylib
+
+# Qt-es
+
+/.qmake.cache
+/.qmake.stash
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+*build-*
+
+# QtCreator
+
+*.autosave
+*.config
+*.creator
+*.creator.user
+*.files
+*.includes
+
+
+# QtCreator Qml
+
+*.qmlproject.user
+*.qmlproject.user.*
+
+
+# Build directories
+
+_build
+
+#build files
+#*.hex
+*.zip
+
+!hex/
+!hex/*
+!hex/s132_nrf52_3.1.0_softdevice.hex
+
+# VisualGDB Makefile
+
+nrf5x.mak
+
+# MacOS Junk
+
+.DS_Store
+
+# SDKs
+
+nRF52_SDK_0.9.2_dbc28c9
+nRF52_SDK_0.9.2_dbc28c9.zip
+nRF5_SDK_11.0.0-2.alpha_bc3f6a0
+nRF5_SDK_11.0.0-2.alpha_bc3f6a0.zip
+nRF5_SDK_11.0.0_89a8197
+nRF5_SDK_11.0.0_89a8197.zip
+nRF5_SDK_12.0.0_12f24da
+nRF5_SDK_12.0.0_12f24da.zip
+nRF5_SDK_12.1.0_0d23e2a
+nRF5_SDK_12.1.0_0d23e2a.zip
+nRF5_SDK_12.2.*
+nRF5_SDK_12.3.*
+nRF5_SDK_13.*
+nRF5_SDK_14.*
+
+# SES output
+Output
+*.jlink
+
+ruuvi_examples/ruuvi_firmware/ruuvitag_b/s132/ses/ruuvitag_fw.emSession
+
+.directory
+
+ruuvi_examples/ruuvi_firmware/ruuvitag_b/s132/ses/ruuvi_firmware_full.hex
+
+ruuvi_examples/ruuvi_firmware/ruuvitag_b/s132/ses/ruuvitag_b_bootloader.hex
+
+ruuvi_examples/ruuvi_firmware/ruuvitag_b/s132/ses/s132_nrf52_3.1.0_softdevice.hex
+
+ruuvi_examples/ruuvi_firmware/ruuvitag_b/s132/ses/sbc.hex
+
+ruuvi_examples/ruuvi_firmware/ruuvitag_b/s132/ses/settings.hex
