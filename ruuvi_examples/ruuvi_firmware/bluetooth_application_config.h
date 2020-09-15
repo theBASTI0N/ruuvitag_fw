@@ -5,8 +5,8 @@
 #define APP_DEVICE_NAME                 APPLICATION_DEVICE_NAME         /**< TODO: Refactoring **/
 #define APP_DEVICE_NAME_LENGTH          APPLICATION_DEVICE_NAME_LENGTH
 #define APP_TX_POWER                    4                               /**< dBm **/
-#define INIT_FWREV "1.0.0"
-#define INIT_SWREV                      INIT_FWREV                      /**< FW and SW are same thing in this context **/                             
+#define INIT_FWREV                      "1.0.0"                         /**< Door FW revision **/
+#define INIT_SWREV                      "2.3.9"                         /**< Ruuvi Base FW **/                             
 
 // milliseconds until main loop timer function is called. Other timers can bring
 // application out of sleep at higher (or lower) interval.

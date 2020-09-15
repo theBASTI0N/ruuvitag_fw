@@ -83,7 +83,8 @@ void encodeToRawFormat5(uint8_t* data_buffer, const ruuvi_sensor_t* const data, 
 void encodeToSWRawFormat5(uint8_t* data_buffer, const ruuvi_sensor_t* const data, uint16_t acceleration_events, int8_t tx_pwr, bool sw)
 {
     static uint32_t packet_counter = 0;
-    data_buffer[0] = SW_RAW_FORMAT_2;
+    if(sw){data_buffer[0] = SW_DOOR_OPEN;}
+    else{data_buffer[0] = SW_DOOR_CLOSED;}
     int32_t temperature = data->temperature;
     temperature *= 2; //Spec calls for 0.005 degree resolution, bme280 gives 0.01
     if(data->temperature == TEMPERATURE_INVALID) { temperature = TEMPERATURE_INVALID; }
@@ -114,7 +115,6 @@ void encodeToSWRawFormat5(uint8_t* data_buffer, const ruuvi_sensor_t* const data
     data_buffer[14] = (vbatt)&0xFF; //Zeroes tx-pwr bits
     tx_pwr += 40;
     tx_pwr /= 2;
-    if(sw){tx_pwr += 1;} // Door Open if sw. Add one to tx_pwr. Meaning if tx_pwr % 2 != 0 sw is active
     data_buffer[14] |= (tx_pwr)&0x1F; //5 lowest bits for TX pwr
     data_buffer[15] = acceleration_events % 256; // 0 may indicate a multiple of 256 events, not necessarily no events
     data_buffer[16] = packet_counter>>8;

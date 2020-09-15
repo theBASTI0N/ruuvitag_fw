@@ -21,7 +21,8 @@
 #define SENSORTAG_ENCODED_DATA_LENGTH   14            /**< 14 bytes  */
 
 #define RAW_FORMAT_2                    0x05          /**< Proposal, please see https://f.ruuvi.com/t/proposed-next-high-precision-data-format/692 */
-#define SW_RAW_FORMAT_2                 0x15          /**< Variation on above, will alow the determination of reed switch */
+#define SW_DOOR_CLOSED                  0x15          /**< Variation of RAWv2, 15 is door closed */
+#define SW_DOOR_OPEN                    0x16          /**< Variation of RAWv2, 16 is door open */ 
 #define RAW_2_ENCODED_DATA_LENGTH       24
 
 #define WEATHER_STATION_URL_FORMAT      0x02				  /**< Base64 */
